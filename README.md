@@ -3,7 +3,7 @@
 **Privacy-first Instagram follower audit.**
 Upload your Instagram data export and instantly see who doesn’t follow you back.
 
-Live:
+Live: https://ghostcheck-eight.vercel.app/
 
 ---
 
