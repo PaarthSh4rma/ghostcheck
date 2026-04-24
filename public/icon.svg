@@ -1,0 +1,14 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="256" height="256" rx="56" fill="#09090b"/>
+
+  <!-- Ghost body -->
+  <path d="M128 40C86 40 56 70 56 110V190L80 170L104 190L128 170L152 190L176 170L200 190V110C200 70 170 40 128 40Z"
+        fill="#fafafa"/>
+
+  <!-- Eyes -->
+  <circle cx="104" cy="110" r="8" fill="#09090b"/>
+  <circle cx="152" cy="110" r="8" fill="#09090b"/>
+
+  <!-- Checkmark -->
+  <path d="M90 140L120 170L170 120" stroke="#9333ea" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

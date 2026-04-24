@@ -248,6 +248,15 @@ export default function App() {
           </div>
         </section>
       )}
+      <footer style={{ marginTop: "60px", textAlign: "center", opacity: 0.7 }}>
+        <p>
+          Built by Paarth •{" "}
+          <a href="https://github.com/PaarthSh4rma/ghostcheck" target="_blank">
+            GitHub
+          </a>
+        </p>
+        <p>Your data never leaves your browser.</p>
+      </footer>
     </main>
   );
 }
