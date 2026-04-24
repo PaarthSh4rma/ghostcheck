@@ -11,6 +11,27 @@ type Result = {
   mutuals: string[];
 };
 
+const tabLabels: Record<Tab, string> = {
+  notFollowingBack: "Ghosts",
+  mutuals: "Mutuals",
+  youDontFollowBack: "Fans",
+};
+
+const emptyMessages: Record<Tab, string> = {
+  notFollowingBack: "Everyone follows you back. Suspiciously wholesome.",
+  mutuals: "No mutuals found. This is either tragic or the wrong file.",
+  youDontFollowBack: "You follow everyone back. Diplomatic behaviour.",
+};
+
+const roastMessages = [
+  "Audit complete. Some of these relationships were one-sided.",
+  "You follow them. They don’t follow you. Reflect.",
+  "This list is longer than your dignity.",
+  "Mutual respect was not found.",
+  "You’re investing emotionally. They’re not.",
+  "Ghosted. At scale.",
+];
+
 function extractFollowers(data: any): string[] {
   if (!Array.isArray(data)) return [];
 
@@ -41,15 +62,19 @@ export default function App() {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<Tab>("notFollowingBack");
   const [search, setSearch] = useState("");
+  const [roastMode, setRoastMode] = useState(true);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   async function handleAnalyze() {
     setError("");
     setResult(null);
     setSearch("");
     setActiveTab("notFollowingBack");
+    setIsAnalyzing(true);
 
     if (!followersFile || !followingFile) {
       setError("Upload both followers_1.json and following.json first.");
+      setIsAnalyzing(false);
       return;
     }
 
@@ -79,10 +104,19 @@ export default function App() {
         youDontFollowBack,
         mutuals,
       });
+
+      setTimeout(() => {
+        document.querySelector(".results")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 100);
     } catch {
       setError(
         "Could not read those files. Make sure they are valid Instagram JSON exports."
       );
+    } finally {
+      setIsAnalyzing(false);
     }
   }
 
@@ -96,9 +130,7 @@ export default function App() {
 
   function copyList() {
     const list = getActiveList();
-
     if (list.length === 0) return;
-
     navigator.clipboard.writeText(list.join("\n"));
   }
 
@@ -129,18 +161,51 @@ export default function App() {
 
   const activeList = getActiveList();
 
+  const roast =
+    result && roastMode
+      ? roastMessages[result.notFollowingBack.length % roastMessages.length]
+      : null;
+
   return (
     <main className="app">
+      <div className="orb orb-one" />
+      <div className="orb orb-two" />
+
       <section className="hero">
+        <div className="logo-mark">👻</div>
+
         <p className="eyebrow">Privacy-first Instagram audit</p>
+
         <h1>GhostCheck</h1>
+
         <p className="subtitle">
-          Upload your Instagram followers and following JSON files to find who
-          doesn’t follow you back. Your files never leave your browser.
+          Upload your Instagram data export and expose who doesn’t follow you
+          back. No login. No backend. No mercy.
         </p>
+
+        <div className="trust-row">
+          <span>✓ Runs locally</span>
+          <span>✓ No data uploaded</span>
+          <span>✓ CSV export</span>
+        </div>
       </section>
 
-      <section className="card">
+      <section className="card upload-card">
+        <div className="card-top">
+          <div>
+            <h2>Upload your files</h2>
+            <p>Use Instagram’s JSON export: followers_1.json + following.json</p>
+          </div>
+
+          <button
+            type="button"
+            className={`toggle ${roastMode ? "toggle-on" : ""}`}
+            onClick={() => setRoastMode((value) => !value)}
+          >
+            Roast Mode {roastMode ? "On" : "Off"}
+          </button>
+        </div>
+
         <div className="upload-grid">
           <label>
             <span>Followers JSON</span>
@@ -149,6 +214,7 @@ export default function App() {
               accept=".json,application/json"
               onChange={(e) => setFollowersFile(e.target.files?.[0] ?? null)}
             />
+            {followersFile && <small>{followersFile.name}</small>}
           </label>
 
           <label>
@@ -158,16 +224,26 @@ export default function App() {
               accept=".json,application/json"
               onChange={(e) => setFollowingFile(e.target.files?.[0] ?? null)}
             />
+            {followingFile && <small>{followingFile.name}</small>}
           </label>
         </div>
 
-        <button onClick={handleAnalyze}>Analyze</button>
+        <button
+          type="button"
+          className="analyze-btn"
+          onClick={handleAnalyze}
+          disabled={isAnalyzing}
+        >
+          {isAnalyzing ? "Analyzing..." : "Run Audit"}
+        </button>
 
         {error && <p className="error">{error}</p>}
       </section>
 
       {result && (
         <section className="results">
+          {roast && <div className="roast-banner">{roast}</div>}
+
           <div className="stats">
             <div>
               <strong>{result.followers.size}</strong>
@@ -177,9 +253,9 @@ export default function App() {
               <strong>{result.following.size}</strong>
               <span>Following</span>
             </div>
-            <div>
+            <div className="danger-stat">
               <strong>{result.notFollowingBack.length}</strong>
-              <span>Don’t follow back</span>
+              <span>Ghosts found</span>
             </div>
             <div>
               <strong>{result.mutuals.length}</strong>
@@ -189,26 +265,17 @@ export default function App() {
 
           <div className="list-card">
             <div className="tabs">
-              <button
-                className={activeTab === "notFollowingBack" ? "active" : ""}
-                onClick={() => setActiveTab("notFollowingBack")}
-              >
-                ❌ Not following back
-              </button>
-
-              <button
-                className={activeTab === "mutuals" ? "active" : ""}
-                onClick={() => setActiveTab("mutuals")}
-              >
-                🔁 Mutuals
-              </button>
-
-              <button
-                className={activeTab === "youDontFollowBack" ? "active" : ""}
-                onClick={() => setActiveTab("youDontFollowBack")}
-              >
-                👀 You don’t follow back
-              </button>
+              {(Object.keys(tabLabels) as Tab[]).map((tab) => (
+                <button
+                  type="button"
+                  key={tab}
+                  className={activeTab === tab ? "active" : ""}
+                  onClick={() => setActiveTab(tab)}
+                >
+                  {tabLabels[tab]}
+                  <span>{result[tab].length}</span>
+                </button>
+              ))}
             </div>
 
             <div className="list-header">
@@ -218,28 +285,44 @@ export default function App() {
                 onChange={(e) => setSearch(e.target.value)}
               />
 
-              <button className="secondary" onClick={copyList}>
+              <button type="button" className="secondary" onClick={copyList}>
                 Copy
               </button>
 
-              <button className="secondary" onClick={downloadCsv}>
+              <button
+                type="button"
+                className="secondary"
+                onClick={downloadCsv}
+              >
                 Export CSV
               </button>
             </div>
 
             {activeList.length === 0 ? (
-              <p className="empty">Nothing to show here.</p>
+              <div className="empty-state">
+                <div>✨</div>
+                <h3>{emptyMessages[activeTab]}</h3>
+                <p>
+                  {search
+                    ? "No matches. Try a different username."
+                    : "Switch tabs or upload another export."}
+                </p>
+              </div>
             ) : (
               <ul>
-                {activeList.map((user) => (
+                {activeList.map((user, index) => (
                   <li key={user}>
-                    <span>@{user}</span>
+                    <div>
+                      <span className="rank">#{index + 1}</span>
+                      <span className="username">@{user}</span>
+                    </div>
+
                     <a
                       href={`https://instagram.com/${user}`}
                       target="_blank"
                       rel="noreferrer"
                     >
-                      Open
+                      Open profile
                     </a>
                   </li>
                 ))}
@@ -248,7 +331,8 @@ export default function App() {
           </div>
         </section>
       )}
-      <footer style={{ marginTop: "60px", textAlign: "center", opacity: 0.7 }}>
+
+      <footer>
         <p>
           Built by Paarth •{" "}
           <a href="https://github.com/PaarthSh4rma/ghostcheck" target="_blank">
