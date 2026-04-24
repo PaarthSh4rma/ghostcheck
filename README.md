@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
@@ -71,3 +72,7 @@ export default defineConfig([
   },
 ])
 ```
+=======
+# ghostcheck
+Privacy-first Instagram follower audit tool. Upload your data export and instantly see who doesn’t follow you back.
+>>>>>>> 502be3cb380173a3c173d4ae7898fc64404cc1d1
